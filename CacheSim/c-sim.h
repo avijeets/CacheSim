@@ -18,12 +18,12 @@ typedef struct cache {
     int size;
     int blockSize;
     int numOfSets;
-    struct set** arrSets;
+    struct set* arrSets;
     int associative;
 } Cache;
 
 typedef struct set {
-    struct line** arrSets;
+    struct line* arrLines;
 } Set;
 
 typedef struct address {
