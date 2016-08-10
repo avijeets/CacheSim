@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		8ACEC5961D5A751900B544F7 /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = 8ACEC5951D5A751900B544F7 /* main.c */; };
+		8ACEC5A81D5A946E00B544F7 /* c-sim.c in Sources */ = {isa = PBXBuildFile; fileRef = 8ACEC5A61D5A946E00B544F7 /* c-sim.c */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -24,11 +24,12 @@
 
 /* Begin PBXFileReference section */
 		8ACEC5921D5A751900B544F7 /* CacheSim */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = CacheSim; sourceTree = BUILT_PRODUCTS_DIR; };
-		8ACEC5951D5A751900B544F7 /* main.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; };
 		8ACEC59C1D5A753500B544F7 /* mytrace2.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = mytrace2.txt; sourceTree = "<group>"; };
 		8ACEC59D1D5A753500B544F7 /* proj3.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = proj3.pdf; sourceTree = "<group>"; };
 		8ACEC59E1D5A753500B544F7 /* trace1.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = trace1.txt; sourceTree = "<group>"; };
 		8ACEC59F1D5A753500B544F7 /* trace2.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = trace2.txt; sourceTree = "<group>"; };
+		8ACEC5A61D5A946E00B544F7 /* c-sim.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = "c-sim.c"; sourceTree = "<group>"; };
+		8ACEC5A71D5A946E00B544F7 /* c-sim.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "c-sim.h"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -61,7 +62,8 @@
 		8ACEC5941D5A751900B544F7 /* CacheSim */ = {
 			isa = PBXGroup;
 			children = (
-				8ACEC5951D5A751900B544F7 /* main.c */,
+				8ACEC5A61D5A946E00B544F7 /* c-sim.c */,
+				8ACEC5A71D5A946E00B544F7 /* c-sim.h */,
 				8ACEC59C1D5A753500B544F7 /* mytrace2.txt */,
 				8ACEC59D1D5A753500B544F7 /* proj3.pdf */,
 				8ACEC59E1D5A753500B544F7 /* trace1.txt */,
@@ -128,7 +130,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				8ACEC5961D5A751900B544F7 /* main.c in Sources */,
+				8ACEC5A81D5A946E00B544F7 /* c-sim.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
