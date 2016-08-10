@@ -19,6 +19,7 @@ unsigned int logBased(int x) {
     return ans;
 }
 
+// MARK: Deciding if Cache Size and Block Size input is valid (power of two)
 int cacheSizeValid(int a) { // checking to see if power of two
     while (((a % 2) == 0) && (a > 1)) { // even, and above 1
         a /= 2; // keep looping to check if power of 2
@@ -33,11 +34,74 @@ int blockSizeValid(int a) { // checking to see if power of two
     return (a == 1); // returns 1, if 1
 }
 
-int calculateNumSets (int blockSize, int associative, int cacheSize){
-    int numSets = cacheSize / (blockSize * associative);
-    return numSets;
+//MARK: Hex -> Int, Char -> Int, Int -> Binary, Binary -> Int
+int hexToInt (char* hex) {
+    int i, k, value, coeff, sum, len;
+    len = strlen(hex);
+    value = 0;
+    coeff = 1;
+    
+    for (i = 0; i < len; i++) {
+        if (hex[i] <= '9' && hex[i] >= '0') {
+            value = hex[i] - '0';
+        }
+        else if (hex[i] <= 'f' && hex[i] >= 'a') {
+            value = hex[i] - 'W';
+        }
+        coeff = 1;
+        for (k = (len - 1 - i); k > 0; k--){
+            coeff *= 16;
+        }
+        sum += (coeff * value);
+    }
+    return sum;
 }
 
+int charToInt (char* str) {
+    int i = atoi(str);
+    return i;
+}
+
+/*Not complete
+char* intToBinary (int num, char* str) {
+    *(str+5) = '\0';
+    int mask = 0x10 << 1;
+    while(mask >>= 1){
+        *str++ = !!(mask & num) + '0';
+    }
+    return str;
+}
+
+int binaryToInt (char* bin) {
+    int i, k, value, coeff, sum, len;
+    len = strlen(bin);
+    value = 0;
+    coeff = 1;
+    
+    for (i = 0; i < len; i++) {
+        // FIX ERROR CHECKS
+        if (bin[i] <= '9' && bin[i] >= '0') {
+            value = bin[i] - '0';
+        }
+        else if (bin[i] <= 'f' && bin[i] >= 'a') {
+            value = bin[i] - 'W';
+        }
+        coeff = 1;
+        for (k = (len - 1 - i); k > 0; k--){
+            coeff *= 16;
+        }
+        sum += (coeff * value);
+    }
+    return sum;
+}*/
+
+//# of sets based on cache formula: (cache = b * e * s)
+int calculateNumOfSets (int blockSize, int associative, int cacheSize){
+    int numOfSets = cacheSize / (blockSize * associative);
+    return numOfSets;
+}
+
+// MARK: Associative or Direct Cache Type
 int cacheType (char* exp) {
     if (strcmp(exp, "assoc") == 0){
         return 4;
@@ -46,7 +110,7 @@ int cacheType (char* exp) {
         return 1;
     }
     else {
-        //stderr
+        fprintf(stderr,"Not valid cache type.\n");
         exit(0);
         return 0;
     }
@@ -54,14 +118,42 @@ int cacheType (char* exp) {
 
 Cache *createCache (int size, int blockSize, int numOfSets, int associative){
     Cache *sim = malloc(sizeof(Cache));
+    sim -> hits = 0;
+    sim -> misses = 0;
+    sim -> reads = 0;
+    sim -> writes = 0;
+    sim -> size = size;
+    sim -> numOfSets = numOfSets;
+    sim -> blockSize = blockSize;
+    sim -> associative = associative;
+    
+    sim -> arrSets = malloc(sizeof(Set) * numOfSets);
+    //go through every set, allocate the lines
+    int i;
+    for (i = 0; i <= numOfSets; i++){
+        //allocate lines
+        sim -> arrSets[i].arrLines = malloc(sizeof(Line) * associative);
+        //loop for allocateing char* tag for every line
+        for (i = 0; i <= associative; i++){
+            //allocate char* tag to every line
+        }
+    }
+    
     return sim;
 }
 
 int main(int argc, char ** argv){
-    int associative = cacheType(argv[2]);
-    int numOfSets = calculateNumSets(0, 0, 0);
-    
+    int cacheSize = argv[1];
+    int associative = cacheType(argv[2]); // will return assoc or direct
+    int blockSize = argv[3];
     char* traceFile = argv[4];
+    int numOfSets = calculateNumOfSets(blockSize, associative, cacheSize); // s = c/(be)
+    
+    //cache bit calculation
+    int bBits = logBased(blockSize);
+    int sBits = logBased(numOfSets);
+    int tBits = 32 - bBits - sBits;
+    
     
     FILE *new = fopen(traceFile, "r");
     //while (fgets()) {}

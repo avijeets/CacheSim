@@ -257,6 +257,7 @@
 				8ACEC59B1D5A751900B544F7 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
