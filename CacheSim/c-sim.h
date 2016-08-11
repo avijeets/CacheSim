@@ -3,7 +3,8 @@
 //  CacheSim
 //
 //  Created by Avijeet Sachdev on 8/9/16.
-//  Copyright © 2016 Avijeet Sachdev. All rights reserved.
+//  Copyright © 2016 Avijeet Sachdev.
+//  All rights reserved.
 //
 
 #ifndef c_sim_h

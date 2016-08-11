@@ -35,7 +35,7 @@ int blockSizeValid(int a) { // checking to see if power of two
 }
 
 //MARK: Hex -> Int, Char -> Int, Int -> Binary, Binary -> Int
-int hexToInt (char* hex) {
+int hexToInt (char* hex) { // strtol?
     int i, k, value, coeff, sum, len;
     //initial values
     len = strlen(hex);
@@ -57,22 +57,31 @@ int hexToInt (char* hex) {
     }
     return sum;
 }
-
+//Char -> Int
 int charToInt (char* str) {
     int i = atoi(str);
     return i;
 }
-
-/*Not complete
-char* intToBinary (int num, char* str) {
-    *(str+5) = '\0';
-    int mask = 0x10 << 1;
-    while(mask >>= 1){
-        *str++ = !!(mask & num) + '0';
+//MARK: FIX Int -> Binary
+char* intToBinary (int num) {
+    int i = 0;
+    char response[32];
+    while (num > 0) {
+        num *= 2;
+        if (num >= 1) {
+            response[i] = '1';
+            num -=1;
+            i++;
+        }
+        else {
+            response[i] = '0';
+            i++;
+        }
     }
-    return str;
+    char* respPtr = response;
+    return respPtr;
 }
-
+// MARK: FIX ERROR CHECKS FOR Binary -> Int
 int binaryToInt (char* bin) {
     int i, k, value, coeff, sum, len;
     len = strlen(bin);
@@ -94,7 +103,7 @@ int binaryToInt (char* bin) {
         sum += (coeff * value);
     }
     return sum;
-}*/
+}
 
 //# of sets based on cache formula: (cache = b * e * s)
 int calculateNumOfSets (int blockSize, int associative, int cacheSize){
@@ -117,7 +126,7 @@ int cacheType (char* exp) {
     }
 }
 
-Cache *createCache (int size, int blockSize, int numOfSets, int associative){
+Cache *createCache (int size, int blockSize, int numOfSets, int associative, int tBits){
     Cache *sim = malloc(sizeof(Cache));
     sim -> hits         = 0;
     sim -> misses       = 0;
@@ -137,10 +146,9 @@ Cache *createCache (int size, int blockSize, int numOfSets, int associative){
         //loop for allocateing char* tag for every line
         for (j = 0; j <= associative; j++){
             //allocate char* tag to every line
-            sim -> arrSets[i].arrLines -> tagBits = malloc(sizeof(Line));
+            sim -> arrSets[i].arrLines -> tagBits = malloc(sizeof(char) * tBits);
         }
     }
-    
     return sim;
 }
 
@@ -156,9 +164,13 @@ int main(int argc, char ** argv){
     int sBits = logBased(numOfSets);
     int tBits = 32 - bBits - sBits;
     
+    Cache* L1cache = createCache(cacheSize, blockSize, numOfSets, associative, tBits);
+    
     
     FILE *new = fopen(traceFile, "r");
-    //while (fgets()) {}
+    while(fgets(line, 32, new) != NULL) {
+        
+    }
     
     return 0;
 }
