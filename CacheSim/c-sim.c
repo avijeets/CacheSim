@@ -37,20 +37,21 @@ int blockSizeValid(int a) { // checking to see if power of two
 //MARK: Hex -> Int, Char -> Int, Int -> Binary, Binary -> Int
 int hexToInt (char* hex) {
     int i, k, value, coeff, sum, len;
+    //initial values
     len = strlen(hex);
     value = 0;
     coeff = 1;
     
     for (i = 0; i < len; i++) {
         if (hex[i] <= '9' && hex[i] >= '0') {
-            value = hex[i] - '0';
+            value = hex[i] - '0'; //ASCII trick to get value
         }
         else if (hex[i] <= 'f' && hex[i] >= 'a') {
-            value = hex[i] - 'W';
+            value = hex[i] - 'W'; // ASCII trick to get value
         }
         coeff = 1;
         for (k = (len - 1 - i); k > 0; k--){
-            coeff *= 16;
+            coeff *= 16; // base 16
         }
         sum += (coeff * value);
     }
@@ -118,24 +119,25 @@ int cacheType (char* exp) {
 
 Cache *createCache (int size, int blockSize, int numOfSets, int associative){
     Cache *sim = malloc(sizeof(Cache));
-    sim -> hits = 0;
-    sim -> misses = 0;
-    sim -> reads = 0;
-    sim -> writes = 0;
-    sim -> size = size;
-    sim -> numOfSets = numOfSets;
-    sim -> blockSize = blockSize;
-    sim -> associative = associative;
+    sim -> hits         = 0;
+    sim -> misses       = 0;
+    sim -> reads        = 0;
+    sim -> writes       = 0;
+    sim -> size         = size;
+    sim -> numOfSets    = numOfSets;
+    sim -> blockSize    = blockSize;
+    sim -> associative  = associative;
     
     sim -> arrSets = malloc(sizeof(Set) * numOfSets);
     //go through every set, allocate the lines
-    int i;
+    int i, j;
     for (i = 0; i <= numOfSets; i++){
         //allocate lines
         sim -> arrSets[i].arrLines = malloc(sizeof(Line) * associative);
         //loop for allocateing char* tag for every line
-        for (i = 0; i <= associative; i++){
+        for (j = 0; j <= associative; j++){
             //allocate char* tag to every line
+            sim -> arrSets[i].arrLines -> tagBits = malloc(sizeof(Line));
         }
     }
     
@@ -143,11 +145,11 @@ Cache *createCache (int size, int blockSize, int numOfSets, int associative){
 }
 
 int main(int argc, char ** argv){
-    int cacheSize = argv[1];
-    int associative = cacheType(argv[2]); // will return assoc or direct
-    int blockSize = argv[3];
-    char* traceFile = argv[4];
-    int numOfSets = calculateNumOfSets(blockSize, associative, cacheSize); // s = c/(be)
+    int cacheSize       = argv[1];
+    int associative     = cacheType(argv[2]); // will return assoc or direct
+    int blockSize       = argv[3];
+    char* traceFile     = argv[4];
+    int numOfSets       = calculateNumOfSets(blockSize, associative, cacheSize); // s = c/(be)
     
     //cache bit calculation
     int bBits = logBased(blockSize);
