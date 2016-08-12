@@ -160,6 +160,38 @@ unsigned int getTag(char* bin, int blockBits, int setBits){
     return tag;
 }
 
+int getSetIndex (char* bin, int bBits, int sBits){
+    char *p;
+    int len, index, lenWithSBits;
+    p = (char *)malloc(sBits + 1);
+    int count, i= 0;
+    len = strlen(bin) - bBits - sBits;
+    lenWithSBits = strlen(bin) - bBits;
+    for(i = len;i < lenWithSBits; i++){
+        *(p + count) = bin[i];
+        count++;
+    }
+    *(p+count) = '\0';
+    index = binaryToInt(p);
+    return index;
+}
+
+int getTagCount (char* bin, int bBits, int sBits) {
+    char *p;
+    unsigned int tag;
+    int len = strlen(bin) - bBits - sBits;
+    p = (char*)malloc(len);
+    int i;
+    
+    for(i = 0; i < len; i++){
+        *(p+i) = bin[i];
+        
+    }
+    
+    *(p+i) = '\0';
+    tag = binaryToInt(p);
+    return tag;
+}
 
 int main(int argc, char ** argv){
     //populating the cache and keeping track of arguments
@@ -190,15 +222,23 @@ int main(int argc, char ** argv){
             }
             int readCount, writeCount, cacheHitCount = 0;
             int hits, miss, writes, memRead = 0;
+            
+            char* bin = intToBinary(hexToInt(line));
+            int setI = getSetIndex(bin, bBits, sBits);
+            unsigned int tag = getTagCount(bin, bBits, sBits);
             if (*p == 'R') {
-               /*readCount++;
-                if (hits) {
+               readCount++;
+                if (L1cache[setI][1] == 0) {
                     hits++;
                 }
-                else if (miss){
+                else if (cache[setI][0] == 0) {
+                    miss++;
+                    read++; // finish
+                }
+                else {
                     miss++;
                     memRead++;
-                }*/
+                }
              }
              if (*p == 'W'){
                /* writeCount++;
