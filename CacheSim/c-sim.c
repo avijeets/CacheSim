@@ -10,6 +10,7 @@
 #include "string.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 
 unsigned int logBased(int x) {
     unsigned int ans = 0 ;
@@ -82,24 +83,17 @@ char* intToBinary (int num) {
     return respPtr;
 }
 // MARK: FIX ERROR CHECKS FOR Binary -> Int
-int binaryToInt (char* bin) {
-    int i, k, value, coeff, sum, len;
-    len = strlen(bin);
-    value = 0;
-    coeff = 1;
-    
-    for (i = 0; i < len; i++) {
-        if (bin[i] == 1) {
-            value = 1;
-        }
-        /*else if (bin[i] == 0) {
-            continue;
-        }*/
-        coeff = 1;
-        for (k = (len - 1 - i); k > 0; k--){
-            coeff *= 2;
-        }
-        sum += (coeff * value);
+unsigned int binaryToInt(char* bin){
+    int i, binaryVal;
+    double n;
+    unsigned int sum = 0;
+    n = 0;
+    for(i = strlen(bin) - 1; i>=0; i--){
+        binaryVal = 0;
+        if(bin[i] == '1')
+            binaryVal = 1;
+        sum += (binaryVal*((unsigned int)(pow(2.0, n))));
+        n++;
     }
     return sum;
 }
@@ -151,6 +145,22 @@ Cache *createCache (int size, int blockSize, int numOfSets, int associative, int
     return sim;
 }
 
+unsigned int getTag(char* bin, int blockBits, int setBits){
+    char *p;
+    unsigned int tag;
+    int i;
+    
+    p = (char *)malloc(strlen(bin) - blockBits - setBits);
+    for(i=0; i < strlen(bin) - blockBits - setBits; i++){
+        *(p+i) = bin[i];
+    }
+    
+    *(p+i) = '\0';
+    tag = binaryToInt(p);
+    return tag;
+}
+
+
 int main(int argc, char ** argv){
     //populating the cache and keeping track of arguments
     int cacheSize       = argv[1];
@@ -178,16 +188,20 @@ int main(int argc, char ** argv){
                     break; // p can't be that short
                 p++; // if it's applicable length, keep traversing
             }
-            /*if (read) {
-                if (hit) {
+            int readCount, writeCount, cacheHitCount = 0;
+            int hits, miss, writes, memRead = 0;
+            if (*p == 'R') {
+               /*readCount++;
+                if (hits) {
                     hits++;
                 }
                 else if (miss){
                     miss++;
                     memRead++;
-                }
+                }*/
              }
-             if (write){
+             if (*p == 'W'){
+               /* writeCount++;
                 if (hit) {
                     hits++;
                     write++;
@@ -195,8 +209,11 @@ int main(int argc, char ** argv){
                     miss++;
                     read++;
                     write++;
-                }
-             }
+                }*/
+             }/*
+             
+             printf("Memory reads: %i", memRead);
+             printf("Memory writes: %i",
             */
             
         }
