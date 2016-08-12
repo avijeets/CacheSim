@@ -89,16 +89,15 @@ int binaryToInt (char* bin) {
     coeff = 1;
     
     for (i = 0; i < len; i++) {
-        // FIX ERROR CHECKS
-        if (bin[i] <= '9' && bin[i] >= '0') {
-            value = bin[i] - '0';
+        if (bin[i] == 1) {
+            value = 1;
         }
-        else if (bin[i] <= 'f' && bin[i] >= 'a') {
-            value = bin[i] - 'W';
-        }
+        /*else if (bin[i] == 0) {
+            continue;
+        }*/
         coeff = 1;
         for (k = (len - 1 - i); k > 0; k--){
-            coeff *= 16;
+            coeff *= 2;
         }
         sum += (coeff * value);
     }
@@ -153,6 +152,7 @@ Cache *createCache (int size, int blockSize, int numOfSets, int associative, int
 }
 
 int main(int argc, char ** argv){
+    //populating the cache and keeping track of arguments
     int cacheSize       = argv[1];
     int associative     = cacheType(argv[2]); // will return assoc or direct
     int blockSize       = argv[3];
@@ -168,8 +168,38 @@ int main(int argc, char ** argv){
     
     
     FILE *new = fopen(traceFile, "r");
+    char *line = (char *)malloc(32);
+    char *p;
     while(fgets(line, 32, new) != NULL) {
-        
+        p = line;
+        while (strlen(p) > 0) {
+            while (*p == ' ') { //whitespace
+                if (strlen(p) == 1)
+                    break; // p can't be that short
+                p++; // if it's applicable length, keep traversing
+            }
+            /*if (read) {
+                if (hit) {
+                    hits++;
+                }
+                else if (miss){
+                    miss++;
+                    memRead++;
+                }
+             }
+             if (write){
+                if (hit) {
+                    hits++;
+                    write++;
+                if (miss) {
+                    miss++;
+                    read++;
+                    write++;
+                }
+             }
+            */
+            
+        }
     }
     
     return 0;
