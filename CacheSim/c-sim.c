@@ -58,45 +58,6 @@ int hexToInt (char* hex) { // strtol?
     }
     return sum;
 }
-//Char -> Int
-int charToInt (char* str) {
-    int i = atoi(str);
-    return i;
-}
-//MARK: FIX Int -> Binary
-char* intToBinary (int num) {
-    int i = 0;
-    char response[32];
-    while (num > 0) {
-        num *= 2;
-        if (num >= 1) {
-            response[i] = '1';
-            num -=1;
-            i++;
-        }
-        else {
-            response[i] = '0';
-            i++;
-        }
-    }
-    char* respPtr = response;
-    return respPtr;
-}
-// MARK: FIX ERROR CHECKS FOR Binary -> Int
-unsigned int binaryToInt(char* bin){
-    int i, binaryVal;
-    double n;
-    unsigned int sum = 0;
-    n = 0;
-    for(i = strlen(bin) - 1; i>=0; i--){
-        binaryVal = 0;
-        if(bin[i] == '1')
-            binaryVal = 1;
-        sum += (binaryVal*((unsigned int)(pow(2.0, n))));
-        n++;
-    }
-    return sum;
-}
 
 //# of sets based on cache formula: (cache = b * e * s)
 int calculateNumOfSets (int blockSize, int associative, int cacheSize){
@@ -119,7 +80,7 @@ int cacheType (char* exp) {
     }
 }
 
-Cache *createCache (int size, int blockSize, int numOfSets, int associative, int tBits){
+Cache* createCache (int size, int blockSize, int numOfSets, int associative, int tBits){
     Cache *sim = malloc(sizeof(Cache));
     sim -> hits         = 0;
     sim -> misses       = 0;
@@ -129,135 +90,111 @@ Cache *createCache (int size, int blockSize, int numOfSets, int associative, int
     sim -> numOfSets    = numOfSets;
     sim -> blockSize    = blockSize;
     sim -> associative  = associative;
-    
-    sim -> arrSets = malloc(sizeof(Set) * numOfSets);
-    //go through every set, allocate the lines
-    int i, j;
-    for (i = 0; i <= numOfSets; i++){
-        //allocate lines
-        sim -> arrSets[i].arrLines = malloc(sizeof(Line) * associative);
-        //loop for allocateing char* tag for every line
-        for (j = 0; j <= associative; j++){
-            //allocate char* tag to every line
-            sim -> arrSets[i].arrLines -> tagBits = malloc(sizeof(char) * tBits);
-        }
-    }
+    sim -> arrSets = calloc(sizeof(Set) * numOfSets, 0);
     return sim;
-}
-
-unsigned int getTag(char* bin, int blockBits, int setBits){
-    char *p;
-    unsigned int tag;
-    int i;
-    
-    p = (char *)malloc(strlen(bin) - blockBits - setBits);
-    for(i=0; i < strlen(bin) - blockBits - setBits; i++){
-        *(p+i) = bin[i];
-    }
-    
-    *(p+i) = '\0';
-    tag = binaryToInt(p);
-    return tag;
-}
-
-int getSetIndex (char* bin, int bBits, int sBits){
-    char *p;
-    int len, index, lenWithSBits;
-    p = (char *)malloc(sBits + 1);
-    int count, i= 0;
-    len = strlen(bin) - bBits - sBits;
-    lenWithSBits = strlen(bin) - bBits;
-    for(i = len;i < lenWithSBits; i++){
-        *(p + count) = bin[i];
-        count++;
-    }
-    *(p+count) = '\0';
-    index = binaryToInt(p);
-    return index;
-}
-
-int getTagCount (char* bin, int bBits, int sBits) {
-    char *p;
-    unsigned int tag;
-    int len = strlen(bin) - bBits - sBits;
-    p = (char*)malloc(len);
-    int i;
-    
-    for(i = 0; i < len; i++){
-        *(p+i) = bin[i];
-        
-    }
-    
-    *(p+i) = '\0';
-    tag = binaryToInt(p);
-    return tag;
 }
 
 int main(int argc, char ** argv){
     //populating the cache and keeping track of arguments
-    int cacheSize       = argv[1];
+    int cacheSize       = atoi(argv[1]);
     int associative     = cacheType(argv[2]); // will return assoc or direct
-    int blockSize       = argv[3];
+    int blockSize       = atoi(argv[3]);
     char* traceFile     = argv[4];
     int numOfSets       = calculateNumOfSets(blockSize, associative, cacheSize); // s = c/(be)
     
     //cache bit calculation
-    int bBits = logBased(blockSize);
-    int sBits = logBased(numOfSets);
-    int tBits = 32 - bBits - sBits;
+    int bBits           = logBased(blockSize);
+    int sBits           = logBased(numOfSets);
+    int tBits           = 32 - bBits - sBits;
     
     Cache* L1cache = createCache(cacheSize, blockSize, numOfSets, associative, tBits);
     
-    
     FILE *new = fopen(traceFile, "r");
-    char *line = (char *)malloc(32);
+    char *line = (char *)malloc(50);
     char *p;
-    while(fgets(line, 32, new) != NULL) {
-        p = line;
-        while (strlen(p) > 0) {
-            while (*p == ' ') { //whitespace
-                if (strlen(p) == 1)
-                    break; // p can't be that short
-                p++; // if it's applicable length, keep traversing
-            }
-            int readCount, writeCount, cacheHitCount = 0;
-            int hits, miss, writes, memRead = 0;
-            
-            char* bin = intToBinary(hexToInt(line));
-            int setI = getSetIndex(bin, bBits, sBits);
-            unsigned int tag = getTagCount(bin, bBits, sBits);
-            if (*p == 'R') {
-               readCount++;
-                if (L1cache[setI][1] == 0) {
-                    hits++;
-                }
-                else if (cache[setI][0] == 0) {
-                    miss++;
-                    read++; // finish
-                }
-                else {
-                    miss++;
-                    memRead++;
-                }
-             }
-             if (*p == 'W'){
-               /* writeCount++;
-                if (hit) {
-                    hits++;
-                    write++;
-                if (miss) {
-                    miss++;
-                    read++;
-                    write++;
-                }*/
-             }/*
-             
-             printf("Memory reads: %i", memRead);
-             printf("Memory writes: %i",
-            */
-            
+    //int hits = 0, miss = 0, writes = 0, memRead = 0;
+    int i = 0;
+    
+    int setIndex = 0, tagInt = 0, addressCorrect = 0;
+    //printf("addr: '%s'\n", addr);
+    
+    Set* currentSet;
+    int lineSpec; //specific line
+    
+    //MAIN LOOP
+    while(fgets(line, 50, new) != NULL) {
+        if (line[0] == '#'){
+            break;
         }
+        p = line + 13;
+        //address count
+        addressCorrect = strtol(p, NULL, 16);
+        //printf("P AND ADDR: %s, %i\n", p, addressCorrect);
+        addressCorrect /= (pow(2, bBits));
+        
+        //set index
+        setIndex = addressCorrect % (int)((pow(2, sBits)));
+        addressCorrect /= (pow(2, sBits));
+        
+        //tagInt from mem
+        tagInt = addressCorrect % (int)((pow(2, tBits)));
+        
+        int hitBool = 0;
+        
+        //printf("setIndex: %i\n", setIndex);
+        //printf("address: %i\n", addressCorrect);
+        
+        currentSet = &L1cache->arrSets[setIndex];
+        //read from 12th char
+        if (line[11] == 'R') {
+            for (i = 0; i < associative; i++){
+                if (currentSet->arrLines[i].validBits == 1 &&
+                    tagInt == currentSet->arrLines[i].tagBits) {
+                    //printf("READ SET BITS: %i, TAG BITS: %i, BLOCK BITS: %i\n", sBits, tBits, bBits);
+                    //printf("currentSet->arrLines[i].validBits: %i\n", currentSet->arrLines[i].validBits);
+                    //printf("LOOK AT THIS FROM READ: %i, %i\n", addressCorrect, currentSet->arrLines[i].tagBits);
+                    L1cache->hits++;
+                    hitBool = 1;
+                    break;
+                }
+            }
+            if(!hitBool) {
+                L1cache->misses++;
+                lineSpec = currentSet->fifo % associative;
+                currentSet->arrLines[lineSpec].validBits = 1;
+                currentSet->arrLines[lineSpec].tagBits = tagInt;
+                currentSet->fifo++;
+                L1cache->reads++;
+            }
+         }
+        
+        //write from 12th char
+        if (line[11] == 'W'){
+            L1cache->writes++;
+            for (i = 0; i < associative; i++){
+                if (currentSet->arrLines[i].validBits == 1 &&
+                    tagInt == currentSet->arrLines[i].tagBits) {
+                    //printf("WRITE SET BITS: %i, TAG BITS: %i, BLOCK BITS: %i\n", sBits, tBits, bBits);
+                    //printf("LOOK AT THIS FROM WRITE: %i, % i\n", tagInt, currentSet->arrLines[i].tagBits);
+                    L1cache->hits++;
+                    hitBool = 1;
+                    break;
+                }
+            }
+            if(!hitBool){
+                L1cache->misses++;
+                lineSpec = currentSet->fifo % associative;
+                currentSet->arrLines[lineSpec].validBits = 1;
+                currentSet->arrLines[lineSpec].tagBits = tagInt;
+                currentSet->fifo++;
+                L1cache->reads++;
+            }
+         }
     }
+    printf("Memory reads: %i\n", L1cache->reads);
+    printf("Memory writes: %i\n", L1cache->writes);
+    printf("Cache hits: %i\n", L1cache->hits);
+    printf("Cache misses: %i\n", L1cache->misses);
     
     return 0;
 }

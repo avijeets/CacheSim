@@ -23,18 +23,19 @@ typedef struct cache {
     int associative;
 } Cache;
 
+typedef struct line{
+    int validBits;
+    int tagBits;
+} Line;
+
 typedef struct set {
-    struct line* arrLines;
+    Line arrLines[4];
+    int fifo;
 } Set;
 
 typedef struct address {
     char* tagBits;
     char* setBits;
 } Address;
-
-typedef struct line{
-    int validBits;
-    char* tagBits;
-} Line;
 
 #endif /* c_sim_h */
