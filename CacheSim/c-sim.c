@@ -35,30 +35,6 @@ int blockSizeValid(int a) { // checking to see if power of two
     return (a == 1); // returns 1, if 1
 }
 
-//MARK: Hex -> Int, Char -> Int, Int -> Binary, Binary -> Int
-int hexToInt (char* hex) { // strtol?
-    int i, k, value, coeff, sum, len;
-    //initial values
-    len = strlen(hex);
-    value = 0;
-    coeff = 1;
-    
-    for (i = 0; i < len; i++) {
-        if (hex[i] <= '9' && hex[i] >= '0') {
-            value = hex[i] - '0'; //ASCII trick to get value
-        }
-        else if (hex[i] <= 'f' && hex[i] >= 'a') {
-            value = hex[i] - 'W'; // ASCII trick to get value
-        }
-        coeff = 1;
-        for (k = (len - 1 - i); k > 0; k--){
-            coeff *= 16; // base 16
-        }
-        sum += (coeff * value);
-    }
-    return sum;
-}
-
 //# of sets based on cache formula: (cache = b * e * s)
 int calculateNumOfSets (int blockSize, int associative, int cacheSize){
     int numOfSets = cacheSize / (blockSize * associative);
@@ -96,11 +72,26 @@ Cache* createCache (int size, int blockSize, int numOfSets, int associative, int
 
 int main(int argc, char ** argv){
     //populating the cache and keeping track of arguments
-    int cacheSize       = atoi(argv[1]);
-    int associative     = cacheType(argv[2]); // will return assoc or direct
-    int blockSize       = atoi(argv[3]);
+    int cacheSize = 0, associative = 0, blockSize = 0, numOfSets = 0;
+    if (cacheSizeValid(atoi(argv[1]))) { // if power of two
+        cacheSize       = atoi(argv[1]);
+    }
+    else { // not power of two
+        fprintf(stderr,"Invalid cache size.\n");
+        exit(0);
+        return 0;
+    }
+    associative         = cacheType(argv[2]); // will return assoc or direct
+    if (blockSizeValid(atoi(argv[3]))){ // if power of two
+        blockSize       = atoi(argv[3]);
+    }
+    else { // not power of two
+        fprintf(stderr,"Invalid block size.\n");
+        exit(0);
+        return 0;
+    }
     char* traceFile     = argv[4];
-    int numOfSets       = calculateNumOfSets(blockSize, associative, cacheSize); // s = c/(be)
+    numOfSets           = calculateNumOfSets(blockSize, associative, cacheSize); // s = c/(be)
     
     //cache bit calculation
     int bBits           = logBased(blockSize);
@@ -112,14 +103,13 @@ int main(int argc, char ** argv){
     FILE *new = fopen(traceFile, "r");
     char *line = (char *)malloc(50);
     char *p;
-    //int hits = 0, miss = 0, writes = 0, memRead = 0;
     int i = 0;
     
     int setIndex = 0, tagInt = 0, addressCorrect = 0;
     //printf("addr: '%s'\n", addr);
     
     Set* currentSet;
-    int lineSpec; //specific line
+    int lineSpec = 0; //specific line
     
     //MAIN LOOP
     while(fgets(line, 50, new) != NULL) {
@@ -189,7 +179,7 @@ int main(int argc, char ** argv){
                 currentSet->fifo++;
                 L1cache->reads++;
             }
-         }
+        }
     }
     printf("Memory reads: %i\n", L1cache->reads);
     printf("Memory writes: %i\n", L1cache->writes);
