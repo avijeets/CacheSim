@@ -66,7 +66,7 @@ Cache* createCache (int size, int blockSize, int numOfSets, int associative, int
     sim -> numOfSets    = numOfSets;
     sim -> blockSize    = blockSize;
     sim -> associative  = associative;
-    sim -> arrSets = calloc(sizeof(Set) * numOfSets, 0);
+    sim -> arrSets = calloc(numOfSets, sizeof(Set));
     return sim;
 }
 
@@ -81,7 +81,9 @@ int main(int argc, char ** argv){
         exit(0);
         return 0;
     }
+    
     associative         = cacheType(argv[2]); // will return assoc or direct
+    
     if (blockSizeValid(atoi(argv[3]))){ // if power of two
         blockSize       = atoi(argv[3]);
     }
@@ -92,11 +94,13 @@ int main(int argc, char ** argv){
     }
     char* traceFile     = argv[4];
     numOfSets           = calculateNumOfSets(blockSize, associative, cacheSize); // s = c/(be)
-    
+    //printf("numOfSets:%d\n",numOfSets);
+    //printf("assoc:%d\n",associative);
     //cache bit calculation
     int bBits           = logBased(blockSize);
     int sBits           = logBased(numOfSets);
     int tBits           = 32 - bBits - sBits;
+	//printf("%d,%d,%d\n",tBits,sBits,bBits);
     
     Cache* L1cache = createCache(cacheSize, blockSize, numOfSets, associative, tBits);
     
@@ -105,8 +109,8 @@ int main(int argc, char ** argv){
     char *p;
     int i = 0;
     
-    int setIndex = 0, tagInt = 0, addressCorrect = 0;
-    //printf("addr: '%s'\n", addr);
+    int setIndex = 0, tagInt = 0, hitBool = 0;
+    long addressCorrect = 0;
     
     Set* currentSet;
     int lineSpec = 0; //specific line
@@ -116,67 +120,66 @@ int main(int argc, char ** argv){
         if (line[0] == '#'){
             break;
         }
-        p = line + 13;
+        p = line + 15; // traverse 13 forward
+        
         //address count
         addressCorrect = strtol(p, NULL, 16);
-        //printf("P AND ADDR: %s, %i\n", p, addressCorrect);
         addressCorrect /= (pow(2, bBits));
         
         //set index
-        setIndex = addressCorrect % (int)((pow(2, sBits)));
+       // setIndex = (int)(addressCorrect % pow(2, sBits));
+	int tmp = pow(2,sBits);
+	 setIndex = addressCorrect % tmp;
         addressCorrect /= (pow(2, sBits));
         
         //tagInt from mem
-        tagInt = addressCorrect % (int)((pow(2, tBits)));
+        tagInt = (int)addressCorrect;
+        //% (int)((pow(2, tBits)));
         
-        int hitBool = 0;
+        hitBool = 0;
         
-        //printf("setIndex: %i\n", setIndex);
-        //printf("address: %i\n", addressCorrect);
-        
-        currentSet = &L1cache->arrSets[setIndex];
+        currentSet = &(L1cache->arrSets[setIndex]);
         //read from 12th char
         if (line[11] == 'R') {
             for (i = 0; i < associative; i++){
+                //printf("RtagInt=%d,%d\n",tagInt,currentSet->arrLines[i].tagBits);
                 if (currentSet->arrLines[i].validBits == 1 &&
                     tagInt == currentSet->arrLines[i].tagBits) {
-                    //printf("READ SET BITS: %i, TAG BITS: %i, BLOCK BITS: %i\n", sBits, tBits, bBits);
-                    //printf("currentSet->arrLines[i].validBits: %i\n", currentSet->arrLines[i].validBits);
-                    //printf("LOOK AT THIS FROM READ: %i, %i\n", addressCorrect, currentSet->arrLines[i].tagBits);
-                    L1cache->hits++;
+                    (L1cache->hits)++;
                     hitBool = 1;
                     break;
                 }
             }
-            if(!hitBool) {
+            if(hitBool==0) {
                 L1cache->misses++;
-                lineSpec = currentSet->fifo % associative;
+                lineSpec = currentSet->fifo;
                 currentSet->arrLines[lineSpec].validBits = 1;
-                currentSet->arrLines[lineSpec].tagBits = tagInt;
-                currentSet->fifo++;
+                ((currentSet->arrLines)[lineSpec]).tagBits = tagInt;
+                //printf("%d,%d\n",lineSpec,currentSet->arrLines[lineSpec].tagBits);
+                currentSet->fifo =(currentSet->fifo + 1)%associative;
                 L1cache->reads++;
             }
          }
         
         //write from 12th char
-        if (line[11] == 'W'){
+        else if (line[11] == 'W'){
             L1cache->writes++;
             for (i = 0; i < associative; i++){
+                //printf("WtagInt=%d,%d\n",tagInt,currentSet->arrLines[i].tagBits);
                 if (currentSet->arrLines[i].validBits == 1 &&
                     tagInt == currentSet->arrLines[i].tagBits) {
-                    //printf("WRITE SET BITS: %i, TAG BITS: %i, BLOCK BITS: %i\n", sBits, tBits, bBits);
-                    //printf("LOOK AT THIS FROM WRITE: %i, % i\n", tagInt, currentSet->arrLines[i].tagBits);
-                    L1cache->hits++;
+                    (L1cache->hits)++;
                     hitBool = 1;
                     break;
                 }
             }
-            if(!hitBool){
+            if(hitBool==0){
                 L1cache->misses++;
-                lineSpec = currentSet->fifo % associative;
+                lineSpec = currentSet->fifo;
                 currentSet->arrLines[lineSpec].validBits = 1;
                 currentSet->arrLines[lineSpec].tagBits = tagInt;
-                currentSet->fifo++;
+                //printf("%d,%d\n",lineSpec,currentSet->arrLines[lineSpec].tagBits);
+                currentSet->fifo = (currentSet->fifo+1)%associative;
                 L1cache->reads++;
             }
         }
