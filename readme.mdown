@@ -1,0 +1,7 @@
+# CacheSim
+
+This project was a simulator of an L1 Cache, using the FIFO replacement algorithm to catch hits, misses, memory reads, and memory writes.
+
+:mag: :computer: :mag:
+
+All bits get calculated based on input and eventually help in the creation of the cache's properties (size, amount of sets, line/set). From there, the program takes in trace files populated with data to create a corresponding cache, which are if the operation is a memory read or write, and an address which is decomposed to fill in in bit amounts with a nifty algorithm. 
